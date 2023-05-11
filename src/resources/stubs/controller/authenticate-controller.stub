@@ -14,7 +14,7 @@ use App\Requests\OtpRequest;
 use Illuminate\Support\Facades\Mail;
 use App\Traits\AuthenticationTrait;
 
-class LoginController extends Controller
+class AuthenticationController extends Controller
 {
 
     use AuthenticationTrait;

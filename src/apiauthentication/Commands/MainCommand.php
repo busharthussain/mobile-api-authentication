@@ -67,7 +67,7 @@ class MainCommand extends GeneratorCommand
         foreach ($requests as $name) {
             //create requests
             $request = $name . 'Request';
-            $this->call('otp:request', ['name' => $request]);
+            $this->call('api:request', ['name' => $request]);
         }
 
         $this->call('api:views', ['name' => 'OtpMail']);

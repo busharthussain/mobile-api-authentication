@@ -37,7 +37,7 @@ class ViewCommand extends GeneratorCommand
         $string = str_replace($this->getNamespace($this->getNameInput()) . '\\', '', $this->getNameInput());
         $name = strtolower(preg_replace('/(?<!^)[A-Z]/', '-$0', $string));
             return [
-                'otp-mail.blade.php' => __DIR__ . '/../../resources/stubs/views/otp-mail.stub',
+                'otp-mail.blade.php' => __DIR__ . '/../../resources/stubs/view/otp-mail.stub',
             ];
 
     }

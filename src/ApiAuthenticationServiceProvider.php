@@ -20,6 +20,7 @@ class ApiAuthenticationServiceProvider extends ServiceProvider
             apiauthentication\Commands\MailCommand::class,
             apiauthentication\Commands\ViewCommand::class,
             apiauthentication\Commands\ModelCommand::class,
+            apiauthentication\Commands\TraitCommand::class,
         ]);
     }
 
