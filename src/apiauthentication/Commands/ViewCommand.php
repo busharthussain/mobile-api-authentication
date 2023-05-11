@@ -53,7 +53,7 @@ class ViewCommand extends GeneratorCommand
         $string = str_replace($this->getNamespace($this->getNameInput()) . '\\', '', $this->getNameInput());
         $name = strtolower(preg_replace('/(?<!^)[A-Z]/', '-$0', $string));
 
-        return resource_path('views/emails/' . $name);
+        return resource_path('views/emails/');
     }
 
 

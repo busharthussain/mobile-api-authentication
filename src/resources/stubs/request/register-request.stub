@@ -18,7 +18,7 @@ class RegisterRequest extends FormRequest
              'last_name' => 'required',
              'password' => 'required',
              'email' => 'required',
-             'device_type' => 'required'
+             'device_type' => 'required',
              'gender' => 'required'
         ];
     }

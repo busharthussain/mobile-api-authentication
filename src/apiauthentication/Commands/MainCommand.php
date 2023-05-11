@@ -66,8 +66,7 @@ class MainCommand extends GeneratorCommand
         $this->call('api:trait', ['name' => 'AuthenticationTrait']);
         foreach ($requests as $name) {
             //create requests
-            $request = $name . 'Request';
-            $this->call('api:request', ['name' => $request]);
+            $this->call('api:request', ['name' => $name]);
         }
 
         $this->call('api:views', ['name' => 'OtpMail']);
