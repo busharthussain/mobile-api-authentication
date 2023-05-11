@@ -1,6 +1,6 @@
 <?php
 
-namespace bushart\productmanagement\productmanagement\Commands;
+namespace bushart\apiauthentication\apiauthentication\Commands;
 
 use Illuminate\Support\Str;
 use InvalidArgumentException;
