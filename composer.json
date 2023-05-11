@@ -6,7 +6,7 @@
     "repositories": [
         {
             "type": "composer",
-            "url": "https://github.com/busharthussain/apiauthentication"
+            "url": "https://github.com/busharthussain/mobile-api-authentication"
         }
     ],
     "autoload": {
