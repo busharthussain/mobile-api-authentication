@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
-use App\User;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Requests\LoginRequest;
@@ -13,6 +13,7 @@ use App\Requests\VerifyOtpRequest;
 use App\Requests\OtpRequest;
 use Illuminate\Support\Facades\Mail;
 use App\Traits\AuthenticationTrait;
+use App\Mail\OtpMail;
 
 class AuthenticationController extends Controller
 {
@@ -35,8 +36,8 @@ class AuthenticationController extends Controller
             $user = User::create($input);
             if ($user) {
                 $arr['user_id'] = $user->id;
-                $arr['created_at'] = currentDateTime();
-                $arr['updated_at'] = currentDateTime();
+                $arr['created_at'] = now();
+                $arr['updated_at'] = now();
                 DB::commit();
                 $this->data['token'] = $user->createToken('MyApp')->accessToken;
                 $this->data['user_name'] = $user->user_name;
@@ -48,8 +49,8 @@ class AuthenticationController extends Controller
                 $this->statusCode = $this->successCode;
                 $this->message = 'Your account has been created successfully';
             }
-        } catch (\Illuminate\Database\QueryException $e) {
-            $this->message = $e->errorInfo[2];
+        } catch (\Exception $e) {
+            $this->message = $e->getMessage();
             DB::rollback();
         }
 
@@ -71,7 +72,7 @@ class AuthenticationController extends Controller
             $this->message = 'User not Found';
             if (\Hash::check($request->input('password'), $user->password)) {
                 $user = User::find($user->id);
-                $user->last_login = currentDateTime();
+                $user->last_login = now();
                 $user->device_token = $request->input('device_token');
                 $user->device_type = $request->input('device_type');
                 $user->save();
@@ -98,7 +99,7 @@ class AuthenticationController extends Controller
     * @param OtpRequest $request
     * @return \Illuminate\Http\JsonResponse
     */
-    public function sendOtpOnEmail(OtpRequest $request)  // Params : user_id , email
+    public function sendOtpEmail(OtpRequest $request)  // Params : user_id , email
         {
             $userId = $request->input('user_id');
             $objUser = User::find($userId);
@@ -117,18 +118,18 @@ class AuthenticationController extends Controller
                         $objUser->save();
                         $this->message = 'OTP is sent for email verification';
                         $this->success = true;
-                    } catch (\Illuminate\Database\QueryException $e) {
+                    } catch (\Exception $e) {
                         if (!empty($e->errorInfo[2]))
-                            $this->message = [$e->errorInfo[2]];
+                            $this->message = $e->getMessage();
                         else
                             $this->message = 'Something went wrong';
                     }
                 } catch (\Exception $e) {
-                    $this->message = [$e->getMessage()];
+                    $this->message = $e->getMessage();
                     $this->success = false;
                 }
             } else {
-                $this->message = [Lang::get('messages.userNotFound')];
+                $this->message = 'User not found!';
             }
 
 
@@ -145,31 +146,32 @@ class AuthenticationController extends Controller
     * @throws \Twilio\Exceptions\ConfigurationException
     * @throws \Twilio\Exceptions\TwilioException
     */
-    public function sendOtpOnPhoneNumber(OtpRequest $request) // Params : user_id , extension , mobile_number
+    public function sendOtpPhoneNumber(OtpRequest $request) // Params : user_id , extension , mobile_number
     {
         $userId = $request->user_id;
+        $data = $request->all();
         $extension = $data['extension']; // extension like 92, 91, 1, 44
             $objUser = User::find($this->userId);
             if ($objUser) {
                 $data = $request->all();
                 $input['otp_code'] = mt_rand(1000, 9999);
-                $number = "+" . $data['extension'] . $data['mobile_number'];
+                $number = "+" . $extension . $data['mobile_number'];
                 try {
                     $otp_message = 'Your OTP is ' . $data['otp_code'];
                     $this->sendMessage($otp_message, $number);
                     try {
                         $objUser->otp_code = $data['otp_code'];
-                        $objUser->otp_send_time = currentDateTime();
+                        $objUser->otp_send_time = Now();
                         $objUser->save();
                         $this->message = 'OTP is sent for mobile verification';
                         $this->success = true;
-                    } catch (\Illuminate\Database\QueryException $e) {
+                    } catch (\Exception $e) {
                         if (!empty($e->errorInfo[2]))
-                            $this->message = [$e->errorInfo[2]];
+                            $this->message = $e->getMessage();
                         else
                             $this->message = 'Something went wrong';
                     }
-                } catch (\Twilio\Exceptions\RestException $e) {
+                } catch (\Exception $e) {
                     $this->message = $e->getMessage();
                     $this->success = false;
                 }
@@ -193,7 +195,7 @@ class AuthenticationController extends Controller
         $otpCode = $request->otp_code;
         if ($userId && $otpCode) {
             $objUser = User::find($userId);
-            if (!empty($objUser) {
+            if (!empty($objUser)) {
                 if ($otpCode == $objUser->otp_code) {
                     $objUser->is_verify = 1;
                     $objUser->otp_code = null;

@@ -21,6 +21,7 @@ class ApiAuthenticationServiceProvider extends ServiceProvider
             apiauthentication\Commands\ViewCommand::class,
             apiauthentication\Commands\ModelCommand::class,
             apiauthentication\Commands\TraitCommand::class,
+            apiauthentication\Commands\RouteCommand::class,
         ]);
     }
 

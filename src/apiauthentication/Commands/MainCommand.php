@@ -71,6 +71,7 @@ class MainCommand extends GeneratorCommand
         }
 
         $this->call('api:views', ['name' => 'OtpMail']);
+        $this->call('create:route');
 
         //publish migration
         Artisan::call('vendor:publish', [

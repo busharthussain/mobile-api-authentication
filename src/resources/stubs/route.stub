@@ -1,0 +1,5 @@
+Route::post('register', [App\Http\Controllers\Api\AuthenticateController::class, 'register']);
+Route::post('login', [App\Http\Controllers\Api\AuthenticateController::class, 'login']);
+Route::post('sendOtpEmail', [App\Http\Controllers\Api\AuthenticateController::class, 'sendOtpEmail']);
+Route::post('sendOtpPhoneNumber', [App\Http\Controllers\Api\AuthenticateController::class, 'sendOtpPhoneNumber']);
+Route::post('verifyOtp', [App\Http\Controllers\Api\AuthenticateController::class, 'verifyOtp']);

@@ -22,13 +22,39 @@ trait AuthenticationTrait
     */
     public function sendMessage($message, $recipients)
     {
-        $account_sid = getenv("TWILIO_SID");
         $auth_token = getenv("TWILIO_AUTH_TOKEN");
         $twilio_number = getenv("TWILIO_NUMBER");
-        $client = new Client($account_sid, $auth_token);
-        $response = $client->messages->create($recipients, ['from' => $twilio_number, 'body' => $message]);
+        $accountSid = getenv('TWILIO_ACCOUNT_SID');
+        $success = false;
+        $url = 'https://api.twilio.com/2010-04-01/Accounts/' . $accountSid . '/Messages.json';
 
-        return $response;
+        $postFields = array(
+            'From' => $fromNumber,
+            'To' => $toNumber,
+            'Body' => $message,
+        );
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postFields));
+        curl_setopt($ch, CURLOPT_USERPWD, $accountSid . ':' . $authToken);
+
+        $result = curl_exec($ch);
+
+        curl_close($ch);
+
+        // Handle response
+        if (!empty($result)) {
+            $response = json_decode($result, true);
+            if (!empty($response['sid'])) {
+                $success = true;
+            }
+        }
+
+        return $success;
     }
 
 }
