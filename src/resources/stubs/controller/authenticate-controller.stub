@@ -1,0 +1,219 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Providers\RouteServiceProvider;
+use App\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
+use App\Requests\LoginRequest;
+use App\Requests\RegisterRequest;
+use App\Requests\VerifyOtpRequest;
+use App\Requests\OtpRequest;
+use Illuminate\Support\Facades\Mail;
+use App\Traits\AuthenticationTrait;
+
+class LoginController extends Controller
+{
+
+    use AuthenticationTrait;
+
+
+    /**
+    * sign up api
+    * @param RegisterRequest $request
+    * @return \Illuminate\Http\Response
+    */
+    public function Register(RegisterRequest $request) // Params : first_name , last_name , password , email , device_type , gender
+    {
+        $data = $request->all();
+        $data['password'] = \Hash::make($data['password']);
+        try {
+            DB::beginTransaction();
+            $input['gender'] = $request->input('gender');
+            $user = User::create($input);
+            if ($user) {
+                $arr['user_id'] = $user->id;
+                $arr['created_at'] = currentDateTime();
+                $arr['updated_at'] = currentDateTime();
+                DB::commit();
+                $this->data['token'] = $user->createToken('MyApp')->accessToken;
+                $this->data['user_name'] = $user->user_name;
+                $this->data['device_token'] = $data['device_token'];
+                $this->data['device_type'] = $data['device_type'];
+                $this->data['user_id'] = $user->id;
+                $this->data['email'] = $user->email;
+                $this->success = true;
+                $this->statusCode = $this->successCode;
+                $this->message = 'Your account has been created successfully';
+            }
+        } catch (\Illuminate\Database\QueryException $e) {
+            $this->message = $e->errorInfo[2];
+            DB::rollback();
+        }
+
+        return response()->json(['success' => $this->success, 'data' => $this->data, 'message' => $this->message], $this->statusCode);
+    }
+
+
+    /**
+    * Login api
+    * @param LoginRequest $request
+    * @return \Illuminate\Http\Response
+    */
+    public function login(LoginRequest $request) // Params : email , password , device_type
+    {
+        $user = User::findForEmail($request->input('identifier'));
+        $this->statusCode = $this->errorCode;
+        $this->message = 'Invalid email and username';
+        if (!empty($user)) {
+            $this->message = 'User not Found';
+            if (\Hash::check($request->input('password'), $user->password)) {
+                $user = User::find($user->id);
+                $user->last_login = currentDateTime();
+                $user->device_token = $request->input('device_token');
+                $user->device_type = $request->input('device_type');
+                $user->save();
+                $this->data['token'] = $user->createToken('MyApp')->accessToken;
+                $user = $user->toArray();
+                $this->data['user'] = $user;
+                $this->success = true;
+                $this->statusCode = $this->successCode;
+                $this->message = 'Login Successfully';
+            } else {
+                $this->data = (object)[];
+            }
+        } else {
+            $this->data = (object)[];
+        }
+
+        return response()->json(['success' => $this->success, 'data' => $this->data, 'message' => $this->message], $this->statusCode);
+    }
+
+
+    /**
+    * This is use to verify email address
+    *
+    * @param OtpRequest $request
+    * @return \Illuminate\Http\JsonResponse
+    */
+    public function sendOtpOnEmail(OtpRequest $request)  // Params : user_id , email
+        {
+            $userId = $request->input('user_id');
+            $objUser = User::find($userId);
+            if ($objUser) {
+                $data = $request->all();
+                $data['otp_code'] = mt_rand(1000, 9999);
+                try {
+                    $otp_message = 'Your code is ' . $data['otp_code'];
+                    try {
+                        $arr = [];
+                        $arr['message'] = $otp_message;
+                        $arr['subject'] = 'Your Email code';
+                        $arr['code'] = $data['otp_code'];
+                        Mail::to($data['email'])->send(new OtpMail($arr));
+                        $objUser->otp_code = $data['otp_code'];
+                        $objUser->save();
+                        $this->message = 'OTP is sent for email verification';
+                        $this->success = true;
+                    } catch (\Illuminate\Database\QueryException $e) {
+                        if (!empty($e->errorInfo[2]))
+                            $this->message = [$e->errorInfo[2]];
+                        else
+                            $this->message = 'Something went wrong';
+                    }
+                } catch (\Exception $e) {
+                    $this->message = [$e->getMessage()];
+                    $this->success = false;
+                }
+            } else {
+                $this->message = [Lang::get('messages.userNotFound')];
+            }
+
+
+            return response()->json(['success' => $this->success, 'message' => $this->message], $this->statusCode);
+
+
+        }
+
+    /**
+    * This is use to send otp on phone number
+    *
+    * @param OtpRequest $request
+    * @return \Illuminate\Http\JsonResponse
+    * @throws \Twilio\Exceptions\ConfigurationException
+    * @throws \Twilio\Exceptions\TwilioException
+    */
+    public function sendOtpOnPhoneNumber(OtpRequest $request) // Params : user_id , extension , mobile_number
+    {
+        $userId = $request->user_id;
+        $extension = $data['extension']; // extension like 92, 91, 1, 44
+            $objUser = User::find($this->userId);
+            if ($objUser) {
+                $data = $request->all();
+                $input['otp_code'] = mt_rand(1000, 9999);
+                $number = "+" . $data['extension'] . $data['mobile_number'];
+                try {
+                    $otp_message = 'Your OTP is ' . $data['otp_code'];
+                    $this->sendMessage($otp_message, $number);
+                    try {
+                        $objUser->otp_code = $data['otp_code'];
+                        $objUser->otp_send_time = currentDateTime();
+                        $objUser->save();
+                        $this->message = 'OTP is sent for mobile verification';
+                        $this->success = true;
+                    } catch (\Illuminate\Database\QueryException $e) {
+                        if (!empty($e->errorInfo[2]))
+                            $this->message = [$e->errorInfo[2]];
+                        else
+                            $this->message = 'Something went wrong';
+                    }
+                } catch (\Twilio\Exceptions\RestException $e) {
+                    $this->message = $e->getMessage();
+                    $this->success = false;
+                }
+            } else {
+                $this->message = 'User not found!';
+            }
+
+        return response()->json(['success' => $this->success, 'data' => $this->data, 'message' => $this->message], $this->statusCode);
+    }
+
+    /**
+    * This is used verify otp
+    *
+    * @param VerifyOtpRequest $request
+    * @return \Illuminate\Http\JsonResponse
+    */
+    public function verifyOtp(VerifyOtpRequest $request) // Params : user_id , otp_code
+    {
+        $input = $request->all();
+        $userId = $request->user_id;
+        $otpCode = $request->otp_code;
+        if ($userId && $otpCode) {
+            $objUser = User::find($userId);
+            if (!empty($objUser) {
+                if ($otpCode == $objUser->otp_code) {
+                    $objUser->is_verify = 1;
+                    $objUser->otp_code = null;
+                    $objUser->otp_send_time = null;
+                    if ($objUser->save()) {
+                        $this->success = true;
+                        $this->message = 'User is verified successfully';
+                        $this->statusCode = $this->successCode;
+                    } else {
+                        $this->message = 'Error while verifying user in DB.';
+                    }
+                } else {
+                    $this->message = 'User Not verify';
+                }
+            } else {
+                $this->message = 'User does not exist';
+            }
+        }
+
+        return response()->json(['success' => $this->success, 'data' => $this->data, 'message' => $this->message], $this->statusCode);
+    }
+
+}

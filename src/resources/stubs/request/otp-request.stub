@@ -1,0 +1,45 @@
+<?php
+
+namespace App\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class OtpRequest extends FormRequest
+{
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        return [
+             'user_id' => 'required',
+        ];
+    }
+
+    /**
+     * this is use to function brand table backend validation show message
+     *
+     */
+    public function messages()
+    {
+        return [
+            'user_id.required' => 'user is required',
+        ];
+    }
+
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        $record = [];
+        parse_str($this->data, $record);
+        $this->request->add($record);
+
+        return true;
+    }
+}

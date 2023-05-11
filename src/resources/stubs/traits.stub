@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Traits;
+
+use Twilio\Rest\Client;
+
+trait AuthenticationTrait
+{
+    public $data = [];
+    public $message = '';
+    public $success = false;
+    public $statusCode = 200;
+    private $successCode = 200;
+    private $errorCode = 200;
+
+    /**
+    * @param $message
+    * @param $recipients
+    * @return \Twilio\Rest\Api\V2010\Account\MessageInstance
+    * @throws \Twilio\Exceptions\ConfigurationException
+    * @throws \Twilio\Exceptions\TwilioException
+    */
+    public function sendMessage($message, $recipients)
+    {
+        $account_sid = getenv("TWILIO_SID");
+        $auth_token = getenv("TWILIO_AUTH_TOKEN");
+        $twilio_number = getenv("TWILIO_NUMBER");
+        $client = new Client($account_sid, $auth_token);
+        $response = $client->messages->create($recipients, ['from' => $twilio_number, 'body' => $message]);
+
+        return $response;
+    }
+
+}

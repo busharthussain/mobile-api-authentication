@@ -1,0 +1,33 @@
+{
+    "name": "bushart/apiauthentication",
+    "description": "A simple modified api authentication",
+    "type": "library",
+    "license": "MIT",
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://github.com/busharthussain/apiauthentication"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "bushart\\apiauthentication\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "busharthussain",
+            "email": "busharthussain@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {},
+    "extra": {
+        "laravel": {
+            "providers": [
+                "bushart\\apiauthentication\\ApiAuthenticationServiceProvider"
+            ]
+        }
+    }
+}

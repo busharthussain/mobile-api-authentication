@@ -1,0 +1,55 @@
+<?php
+
+namespace App\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class RegisterRequest extends FormRequest
+{
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        return [
+             'first_name' => 'required',
+             'last_name' => 'required',
+             'password' => 'required',
+             'email' => 'required',
+             'device_type' => 'required'
+             'gender' => 'required'
+        ];
+    }
+
+    /**
+     * this is use to function brand table backend validation show message
+     *
+     */
+    public function messages()
+    {
+        return [
+            'first_name.required' => 'first name is required',
+            'last_name.required' => 'last name is required',
+            'password.required' => 'password is required',
+            'email' => 'email is required',
+            'device_type' => 'device type is required',
+            'gender' => 'gender is required',
+        ];
+    }
+
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        $record = [];
+        parse_str($this->data, $record);
+        $this->request->add($record);
+
+        return true;
+    }
+}
