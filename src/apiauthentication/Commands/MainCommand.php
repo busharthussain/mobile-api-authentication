@@ -60,9 +60,10 @@ class MainCommand extends GeneratorCommand
         //Generate controller
         $controllerName = 'AuthenticationController';
         $this->call('api:controller', ['name' => $controllerName]);
-        $requests = ['LoginRequest','RegisterRequest'];
+        $requests = ['LoginRequest','RegisterRequest','OtpRequest','VerifyOtpRequest'];
         $this->call('api:model', ['name' => 'User']);
         $this->call('api:mail', ['name' => 'OtpMail']);
+        $this->call('api:trait', ['name' => 'AuthenticationTrait']);
         foreach ($requests as $name) {
             //create requests
             $request = $name . 'Request';

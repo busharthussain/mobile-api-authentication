@@ -13,8 +13,6 @@ class ApiAuthenticationServiceProvider extends ServiceProvider
     public function register()
     {
 
-        $this->loadRoutesFrom(__DIR__.'/routes/web.php');
-
         $this->commands([
             apiauthentication\Commands\MainCommand::class,
             apiauthentication\Commands\ControllerCommand::class,

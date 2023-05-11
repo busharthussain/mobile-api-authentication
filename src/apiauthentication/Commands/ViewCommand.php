@@ -36,15 +36,9 @@ class ViewCommand extends GeneratorCommand
     {
         $string = str_replace($this->getNamespace($this->getNameInput()) . '\\', '', $this->getNameInput());
         $name = strtolower(preg_replace('/(?<!^)[A-Z]/', '-$0', $string));
-        if ($name != 'dashboard'){
             return [
-                'otp-mail.blade.php' => __DIR__ . '/../../resources/stubs/view/otp-mail.stub',
+                'otp-mail.blade.php' => __DIR__ . '/../../resources/stubs/views/otp-mail.stub',
             ];
-        }else{
-            return [
-                'otp-mail.blade.php' => __DIR__ . '/../../resources/stubs/views/otp-mail1.stub',
-            ];
-        }
 
     }
 
