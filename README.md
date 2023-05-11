@@ -52,7 +52,7 @@ For more information please visit the link: [Laravel Passport](https://laravel.c
 
 1. Add the service provider to `app/config/app.php`
 ```
-bushart\productmanagement\ProductManagementServiceProvider::class,
+bushart\productmanagement\ApiAuthenticationServiceProvider::class,
 ```
 
 #### Step 2: Setup Database Configuration
