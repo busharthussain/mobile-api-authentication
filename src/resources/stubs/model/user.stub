@@ -24,6 +24,17 @@ class User extends Authenticatable
     ];
 
     /**
+     * This is used to check user exist or not by email
+     *
+     * @param $identifier
+     * @return mixed
+     */
+     public static function findForEmail($email)
+     {
+         return User::where('email',$email)->first();
+     }
+
+    /**
      * The attributes that should be hidden for serialization.
      *
      * @var array<int, string>

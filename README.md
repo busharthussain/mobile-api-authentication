@@ -111,3 +111,6 @@ You can then make API requests to the following endpoints:
 -  `/api/sendOtpEmail`: send otp on mail
 -  `/api/sendOtpPhoneNumber`: send otp on phone number
 -  `/api/verifyOtp`: Verify otp
+
+#### Note
+Please add ``Accept:application/json`` in headers

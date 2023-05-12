@@ -26,14 +26,13 @@ class AuthenticationController extends Controller
     * @param RegisterRequest $request
     * @return \Illuminate\Http\Response
     */
-    public function Register(RegisterRequest $request) // Params : first_name , last_name , password , email , device_type , gender
+    public function register(RegisterRequest $request) // Params : first_name , last_name , password , email , device_type , gender
     {
         $data = $request->all();
         $data['password'] = \Hash::make($data['password']);
         try {
             DB::beginTransaction();
-            $input['gender'] = $request->input('gender');
-            $user = User::create($input);
+            $user = User::create($data);
             if ($user) {
                 $arr['user_id'] = $user->id;
                 $arr['created_at'] = now();
@@ -115,6 +114,7 @@ class AuthenticationController extends Controller
                         $arr['code'] = $data['otp_code'];
                         Mail::to($data['email'])->send(new OtpMail($arr));
                         $objUser->otp_code = $data['otp_code'];
+                        $objUser->otp_send_time = now();
                         $objUser->save();
                         $this->message = 'OTP is sent for email verification';
                         $this->success = true;
@@ -161,7 +161,7 @@ class AuthenticationController extends Controller
                     $this->sendMessage($otp_message, $number);
                     try {
                         $objUser->otp_code = $data['otp_code'];
-                        $objUser->otp_send_time = Now();
+                        $objUser->otp_send_time = now();
                         $objUser->save();
                         $this->message = 'OTP is sent for mobile verification';
                         $this->success = true;
@@ -190,7 +190,6 @@ class AuthenticationController extends Controller
     */
     public function verifyOtp(VerifyOtpRequest $request) // Params : user_id , otp_code
     {
-        $input = $request->all();
         $userId = $request->user_id;
         $otpCode = $request->otp_code;
         if ($userId && $otpCode) {

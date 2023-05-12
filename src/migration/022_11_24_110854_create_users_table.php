@@ -22,6 +22,11 @@ return new class extends Migration
             $table->string('gender')->nullable();
             $table->string('otp_code')->nullable();
             $table->dateTime('otp_send_time')->nullable();
+            $table->timestamp('last_login')->nullable();
+            $table->string('device_type')->nullable(); //for example check request came from web or mobile
+            $table->string('device_token')->nullable();
+            $table->tinyInteger('is_verify')->default(0);
+            $table->dateTime('otp_send_time')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

@@ -48,7 +48,7 @@ class ModelCommand extends GeneratorCommand
         $string = str_replace($this->getNamespace($this->getNameInput()) . '\\', '', $this->getNameInput());
         $name = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $string));
 
-        return __DIR__ . '/../../resources/stubs/models'.'/'.$name.'.stub';
+        return __DIR__ . '/../../resources/stubs/model'.'/'.$name.'.stub';
     }
 
     /**
